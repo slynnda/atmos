@@ -1,33 +1,42 @@
-DIR := $(shell git rev-parse --show-toplevel)
-ORG := therealslynnda
-NAME := $(shell basename -a ${DIR})
+GIT_REPO_DIR := $(shell git rev-parse --show-prefix)
+GIT_ORG := therealslynnda
+GIT_REL_DIR := $(shell basename -a ${GIT_REPO_DIR})
+GIT_REMOTE_ORIGIN := $(shell git config --get remote.origin.url)
 
-DOCKER_BASE_IMAGE := archlinux/base
-DOCKER_HOSTNAME := ${NAME}
+DOCKER_IMAGE_OS := archlinux
+DOCKER_BASE_IMAGE := ${GIT_ORG}/${DOCKER_IMAGE_OS}.base
+DOCKER_IMAGE_TAG := ${GIT_ORG}:${DOCKER_IMAGE_OS}.${GIT_REL_DIR}
+DOCKER_HOSTNAME := ${GIT_REL_DIR}
+DOCKER_CONTAINER_NAME := ${DOCKER_HOSTNAME}
 DOCKER_OS_LANG := en_US.utf-8
 DOCKER_OS_LC_ALL := en_US.utf-8
 
-TERRAFORM_VERSION := 0.11.11
-TERRAFORM_BINARY := "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+APP_NAME := ${GIT_REL_DIR}
+APP_VERSION := 0.11.11
+APP_BINARY := "https://releases.hashicorp.com/${APP_NAME}/${APP_VERSION}/${APP_NAME}_${APP_VERSION}_linux_amd64.zip"
 
 build:
 	docker build \
 	  --build-arg DOCKER_BASE_IMAGE=${DOCKER_BASE_IMAGE} \
 	  --build-arg DOCKER_OS_LANG=${DOCKER_OS_LANG} \
 	  --build-arg DOCKER_OS_LC_ALL=${DOCKER_OS_LC_ALL} \
-	  --build-arg TERRAFORM_VERSION=${TERRAFORM_VERSION} \
-	  --build-arg TERRAFORM_BINARY=${TERRAFORM_BINARY} \
-	  --build-arg PROJECT_NAME=${NAME} \
-	  --tag ${ORG}:${NAME} \
+	  --build-arg APP_NAME=${APP_NAME} \
+	  --build-arg APP_VERSION=${APP_VERSION} \
+	  --build-arg APP_BINARY=${APP_BINARY} \
+	  --label "docker_image_os=${DOCKER_IMAGE_OS}" \
+	  --label "docker_base_image=${DOCKER_BASE_IMAGE}" \
+	  --label "docker_os_lang=${DOCKER_OS_LANG}" \
+	  --label "docker_os_lc_all=${DOCKER__OS_LC_ALL}" \
+	  --label "git_remote_origin=${GIT_REMOTE_ORIGIN}" \
+	  --tag ${DOCKER_IMAGE_TAG} \
 	  .
 
-run:
+run: build
 	docker run \
-	  -e "CONTAINER_EXTERNAL_NAME=${NAME}" \
-	  --name ${NAME} \
+	  --name ${DOCKER_HOSTNAME} \
 	  --hostname ${DOCKER_HOSTNAME} \
 	  --interactive \
 	  --tty \
 	  --rm \
-	  ${ORG}:${NAME} \
+	  ${DOCKER_IMAGE_TAG} \
 	  bash

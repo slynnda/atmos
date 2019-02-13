@@ -3,9 +3,9 @@ FROM ${DOCKER_BASE_IMAGE}
 
 ARG DOCKER_OS_LANG
 ARG DOCKER_OS_LC_ALL
-ARG PROJECT_NAME
-ARG TERRAFORM_VERSION
-ARG TERRAFORM_BINARY
+ARG APP_NAME
+ARG APP_VERSION
+ARG APP_BINARY
 
 ENV LANG ${DOCKER_OS_LANG}
 ENV LC_ALL ${DOCKER_OS_LC_ALL}
@@ -13,12 +13,11 @@ ENV LC_ALL ${DOCKER_OS_LC_ALL}
 RUN pacman --noconfirm -Syu
 RUN pacman --noconfirm -Sy unzip
 
-RUN curl -o /tmp/terraform-${TERRAFORM_VERSION} ${TERRAFORM_BINARY}
-RUN cd /tmp && unzip /tmp/terraform-${TERRAFORM_VERSION} && cd -
-RUN rm /tmp/terraform-${TERRAFORM_VERSION}
-RUN chmod +x /tmp/terraform
-RUN mv /tmp/terraform /bin/terraform
+RUN curl -o /tmp/${APP_NAME}-${APP_VERSION} ${APP_BINARY}
+RUN cd /tmp && unzip /tmp/${APP_NAME}-${APP_VERSION} && cd -
+RUN rm /tmp/${APP_NAME}-${APP_VERSION}
+RUN chmod +x /tmp/${APP_NAME}
+RUN mv /tmp/${APP_NAME} /bin/${APP_NAME}
+RUN mkdir -p /opt/${APP_NAME}
 
-RUN mkdir -p /opt/${PROJECT_NAME}
-
-WORKDIR /opt/${PROJECT_NAME}
+WORKDIR /opt/${APP_NAME}
