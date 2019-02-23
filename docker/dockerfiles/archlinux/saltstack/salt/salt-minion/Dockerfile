@@ -10,6 +10,7 @@ ARG APP_BINARY
 ENV LANG ${DOCKER_OS_LANG}
 ENV LC_ALL ${DOCKER_OS_LC_ALL}
 
+RUN pacman --noconfirm -Syu
 RUN pacman --noconfirm -Sy unzip
 
 RUN curl -o /tmp/${APP_NAME}-${APP_VERSION} ${APP_BINARY}
